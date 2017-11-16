@@ -1,4 +1,4 @@
-import snap
+import networkx as nx
 import numpy as np
 
 class config:
@@ -32,14 +32,14 @@ def processBoards(filename = config.pinterest_filepath + 'boards.tsv', limit = 1
 
 def createGraph(pinMap, boardMap, pinLim = None, boardLim = None, debug = False):
 	assert (pinLim is not None and boardLim is not None)
-	graph = snap.PUNGraph.New()
+	graph = nx.Graph()
 
 	board_idMap = {} #maps 
 	nodeCounter = 0
 	for i, key in enumerate(boardMap):
 		if i == boardLim: break
 		board_idMap[key] = i
-		graph.AddNode(int(i))
+		graph.add_node(i)
 		nodeCounter += 1
 
 	pinCounter = 0
@@ -51,8 +51,9 @@ def createGraph(pinMap, boardMap, pinLim = None, boardLim = None, debug = False)
 			if board_id not in board_idMap: continue
 
 
-			graph.AddNode(nodeCounter)
-			graph.AddEdge(int(nodeCounter), int(board_idMap[board_id]))
+			graph.add_node(nodeCounter)
+			graph.add_edge(nodeCounter, int(board_idMap[board_id]))
+			graph.add_edge(int(board_idMap[board_id]), nodeCounter)
 
 			nodeCounter += 1
 			pinCounter += 1
