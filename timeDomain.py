@@ -4,9 +4,9 @@ import collections
 
 class config:
 	pinterest_filepath = "/cvgl2/u/bcui/Datasets/pinterest_data/"
-	debug = False
+	debug = True
 	
-	num_steps = 5
+	num_steps = 100
 	currStop = None
 
 	board_token = 'b'
@@ -15,11 +15,12 @@ class config:
 
 
 #pin_create_time, board_id, pin_id
-def processPins(filename = config.pinterest_filepath + "pins.tsv", limit = 380e6, debug = config.debug):#limit = 380e6):
+def processPins(filename = config.pinterest_filepath + "pins.tsv", limit = 90e6, debug = config.debug):#limit = 380e6):
 	pinDict = collections.defaultdict(lambda :[])
 	timeList = []
 	with open(filename, "rb") as f:
 		for i,  line in enumerate(f):
+			if i % 1e7 == 0: print "pins", i
 			line = line.strip("\r\n")
 			line = line.split("\t")
 			pinDict[line[2]].append(line[:2])
@@ -44,7 +45,7 @@ def processBoards(filename = config.pinterest_filepath + 'boards.tsv', limit = f
 #gets the degree of nodes in a graph
 def getGraphDegree(graph):
 	degreeMap = collections.defaultdict(int)
-	for node in list(graph.nodes):
+	for node in list(graph.nodes()):
 		if 'b' not in node: continue
 
 		degreeMap[graph.degree(node)] += 1
@@ -63,8 +64,6 @@ def createGraph(pinMap, boardMap, stopTime, pinLim = None, boardLim = None, debu
 
 	pinCounter = 0
 	for pinId in pinMap:
-
-		# if pinCounter == pinLim: break
 		for pinIndex, pin in enumerate(pinMap[pinId]):
 			createTime, board_id = pin
 
