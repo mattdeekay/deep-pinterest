@@ -3,10 +3,11 @@ import numpy as np
 import collections
 
 class config:
-	pinterest_filepath = "/cvgl2/u/bcui/Datasets/pinterest_data/"
+	# pinterest_filepath = "/cvgl2/u/bcui/Datasets/pinterest_data/"
+	pinterest_filepath = "./Datasets/pinterest_data/"
 	debug = True
 	
-	num_steps = 100
+	num_steps = 10
 	currStop = None
 
 	board_token = 'b'
@@ -15,12 +16,12 @@ class config:
 
 
 #pin_create_time, board_id, pin_id
-def processPins(filename = config.pinterest_filepath + "pins.tsv", limit = 90e6, debug = config.debug):#limit = 380e6):
+def processPins(filename = config.pinterest_filepath + "pins.tsv", limit = 1e6, debug = config.debug):#limit = 380e6):
 	pinDict = collections.defaultdict(lambda :[])
 	timeList = []
 	with open(filename, "rb") as f:
 		for i,  line in enumerate(f):
-			if i % 1e7 == 0: print "pins", i
+			if i % 5e5 == 0: print "pins", i
 			line = line.strip("\r\n")
 			line = line.split("\t")
 			pinDict[line[2]].append(line[:2])
@@ -31,7 +32,7 @@ def processPins(filename = config.pinterest_filepath + "pins.tsv", limit = 90e6,
 	return pinDict, sorted(timeList)
 
 #board_id, board_name, board_description, user_id, board_create_time. 
-def processBoards(filename = config.pinterest_filepath + 'boards.tsv', limit = float("inf"), debug = config.debug):
+def processBoards(filename = config.pinterest_filepath + 'boards.tsv', limit = 1e6, debug = config.debug):
     boardMap = {}
     with open(filename, "rb") as f:
         for i, line in enumerate(f):
@@ -69,7 +70,7 @@ def createGraph(pinMap, boardMap, stopTime, pinLim = None, boardLim = None, debu
 
 			if createTime > stopTime: continue
 			
-			if board_id not in board_idMap: continue
+			# if board_id not in board_idMap: continue
 
 			if pinIndex == 0:
 				graph.add_node(config.pin_token + pinId)
@@ -98,6 +99,7 @@ def runTimeDomain():
 
 	for i in reversed(range(1, config.num_steps + 1)):
 		config.currStop = timeList[numTimes/i-1]
+		print "at timestep: ", 	i, "NEW timestep should include: ", numTimes/i
 		createGraph(pinMap, boardMap, config.currStop, pinLim = 1e10, boardLim = 1e10)
 
 
