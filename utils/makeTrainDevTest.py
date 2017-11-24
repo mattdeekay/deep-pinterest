@@ -1,3 +1,8 @@
+'''
+Split every timestep into a timestep for tarin/dev/test
+'''
+
+
 import pickle
 import numpy as np
 import dill
