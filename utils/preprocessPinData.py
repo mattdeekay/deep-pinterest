@@ -6,6 +6,7 @@ import networkx as nx
 import pickle
 import dill
 import collections
+import time
 
 class config:
 	board_token = "b"
@@ -23,6 +24,7 @@ def loadData(file, path = "../Datasets/ML Dataset/Dev/"):
 #gets the degree of nodes in a graph
 #mean neighbor degree for board and pins
 def getGraphDegree(graph):
+	assert(nx.is_frozen(graph))
 	# pinNeighbors = collections.defaultdict(lambda: []) #pinId : list(pint node degrees)
 	# boardNeighbors = collections.defaultdict(lambda: []) #pinId : list(board node degrees)
 
@@ -64,14 +66,12 @@ def getGraphDegree(graph):
 
 #input a default dict that we append the node clustering coefficient to the nodeDictionary
 def getClusterCoef(graph, nodeDict):
+	assert(nx.is_frozen(graph))
+	#we can do this because the graph is static 
+	neighborDict = {} #cache of all such boards 
+
 	for k, node in enumerate(list(graph.nodes())):
 		if config.pin_token not in node: continue
-
-		# k_i = graph.degree(node)
-
-		# if k_i == 1 or k_i == 0:
-			# nodeDict[node].append(0.)
-			# continue
 
 		boardList = set()
 		k_i = 0.
@@ -90,20 +90,53 @@ def getClusterCoef(graph, nodeDict):
 
 		e_i = 0. #computing e_i here
 
-		for i, neighbor in enumerate(nx.all_neighbors(graph, node)):
-			for j, pin_neighbors in enumerate(nx.all_neighbors(graph, neighbor)):
+		neighborList = list(nx.all_neighbors(graph, node))
+
+		# for i, neighbor_b1 in enumerate(nx.all_neighbors(graph, node)):
+			# for j, neighbor_b2 in enumerate(nx.all_neighbors(graph, node)):
+				# if neighbor_b1 == neighbor_b2: continue
+		for i in range(len(neighborList)):
+			neighbor_b1 = neighborList[i]
+			if neighbor_b1 in neighborDict:
+				b1_neighbors = neighborDict[neighbor_b1]
+			else:
+				b1_neighbors = set(nx.all_neighbors(graph, neighbor_b1))
+				neighborDict[neighbor_b1] = b1_neighbors 
+
+			for j in range(len(neighborList[i+1:])):
+				neighbor_b2 = neighborList[j]
+				if neighbor_b2 in neighborDict:
+					b2_neighbors = neighborDict[neighbor_b2]
+				else:
+					b2_neighbors = set(nx.all_neighbors(graph, neighbor_b2))
+					neighborDict[neighbor_b2] = b2_neighbors
+
+				#this code is SOOO slow
+				# e_i += len(set(list(nx.all_neighbors(graph, neighbor_b1)) + list(nx.all_neighbors(graph, neighbor_b2))))-1
+
+
+				union = b1_neighbors.union(b2_neighbors)
+
+				# if len(union) < 1: 
+					# assert(len(union)>0)
+
+				e_i += len(union)-1
+		# print "e_i is: ", e_i
+
+			# for j, pin_neighbors in enumerate(nx.all_neighbors(graph, neighbor)):
 				#condition shouldn't trigger
-				if config.pin_token not in pin_neighbors:
-					assert(False)
-					continue
-				for l, board_pin_neighbor in enumerate(nx.all_neighbors(graph, pin_neighbors)):
-					if board_pin_neighbor in boardList:
-						e_i += 1
+				# if config.pin_token not in pin_neighbors:
+					# assert(False)
+					# continue
+
+				# for l, board_pin_neighbor in enumerate(nx.all_neighbors(graph, pin_neighbors)):
+					# if board_pin_neighbor in boardList:
+						# e_i += 1
 
 
 		clust_coef = e_i / (2. *k_i * (k_i-1))
-		if clust_coef >=1. or clust_coef<=0.:
-			assert(clust_coef <=1. and clust_coef >= 0.)
+		# if clust_coef >=1. or clust_coef<=0.:
+			# assert(clust_coef <=1. and clust_coef >= 0.)
 		nodeDict[node].append(clust_coef)
 	return nodeDict
 
@@ -138,15 +171,21 @@ def createTimeAnalysis():
 
 	boardPinGraph = nx.Graph()
 	for i in range(config.num_timesteps):
-		print "At timestep: ", i
+		currTime = time.clock()
 		currFile = loadData(config.currFile + str(i) + ".pkl")
+		boardPinGraph = nx.Graph(boardPinGraph)
 		boardPinGraph = addToGraph(boardPinGraph, currFile)
+		boardPinGraph = nx.freeze(boardPinGraph)
+
 		featureMap = getGraphDegree(boardPinGraph)
 		featureMap = getClusterCoef(boardPinGraph, featureMap)
 		# for j, key in enumerate(featureMap):
 			# print key, featureMap[key]
 			# if j == 100: break
 		writeFeatures(featureMap, "dev Featurized " + str(i) + ".pkl")
+		print "At timestep: ", i, len(featureMap), " amount of time it took was: ", (time.clock() - currTime)
+
+
 
 	print "number of pins is: ", len(featureMap)
 
@@ -154,10 +193,6 @@ def createTimeAnalysis():
 
 def main():
 	createTimeAnalysis()
-
-
-
-
 
 if __name__ == "__main__":
 	main()
