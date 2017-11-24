@@ -10,7 +10,7 @@ class config:
 	pinterest_filepath = "../Datasets/pinterest_data/"
 	debug = True
 	
-	num_steps = 10
+	num_steps = 50
 	currStop = None
 	topNodeNum = 1e2
 
@@ -38,7 +38,7 @@ def processPins(filename = config.pinterest_filepath + "pins.tsv", limit = 9e6, 
 	# return pinDict, sorted(timeList)
 
 #board_id, board_name, board_description, user_id, board_create_time. 
-def processBoards(filename = config.pinterest_filepath + 'boards.tsv', limit = 1e5, debug = config.debug):
+def processBoards(filename = config.pinterest_filepath + 'boards.tsv', limit = 1e4, debug = config.debug):
     boardMap = {}
     with open(filename, "rb") as f:
         for i, line in enumerate(f):
@@ -52,20 +52,25 @@ def processBoards(filename = config.pinterest_filepath + 'boards.tsv', limit = 1
 
 
 def createTimestep(pinTimeDict, boardMap, timeSteps, timeStepNum, dataLoc = "../Datasets/parsedData/"):
-	boardPinList = []
+	# boardPinList = []
+	timeBoardPinList = collections.defaultdict(lambda : [])
 	for time in pinTimeDict:
 		if time not in timeSteps: continue
 		# print pinTimeDict[time]
 		# board_id, pin_id = pinTimeDict[time]
 		for tup in pinTimeDict[time]:
-			board_id, pin_id = tup
-			boardPinList.append((pin_id, board_id))
+			timeBoardPinList[time].append(tup)
+			# board_id, pin_id = tup
+			# boardPinList.append((pin_id, board_id))
 
-	with open(dataLoc + "boardPin" + str(timeStepNum) + ".txt", "wb") as f:
-		f.write("pin_id, board_id\n")
-		for tup in boardPinList:
-			pin_id, board_id = tup
-			f.write(str("p" + pin_id) + "," +  str("b" + board_id) + "\n")
+	with open(dataLoc + "boardPin" + str(timeStepNum) + ".pkl", "wb") as f:
+		pickle.dump(timeBoardPinList, f)
+
+	# with open(dataLoc + "boardPin" + str(timeStepNum) + ".txt", "wb") as f:
+		# f.write("pin_id, board_id\n")
+		# for tup in boardPinList:
+			# pin_id, board_id = tup
+			# f.write(str("p" + pin_id) + "," +  str("b" + board_id) + "\n")
 
 def outputUsedBoards(pinTimeDict, boardMap, dataLoc = "../Datasets/parsedData/boardDict.pkl"):
 	usedBoardIds = set()
@@ -95,7 +100,7 @@ def parseData():
 	outputUsedBoards(pinTimeDict, boardMap)
 
 	for i in range(config.num_steps):
-		createTimestep(pinTimeDict, boardMap, set(timeList[:(i+1) * pinsPerTimestep]), i)
+		createTimestep(pinTimeDict, boardMap, set(timeList[i * pinsPerTimestep:(i+1) * pinsPerTimestep]), i)
 
 
 	# print "DOING TIME DOMAIN NOW"
