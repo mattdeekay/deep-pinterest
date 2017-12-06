@@ -12,12 +12,13 @@ class config:
 	board_token = "b"
 	pin_token = "p"
 
-	outPath = "../Datasets/Deep Learning Parsed/Dev/"
+	outPath = "../Datasets/Deep Learning Parsed/Test/"
+	outFile = "test Featurized "
 	num_timesteps = 50
 
-	currFile = "dev "
+	currFile = "test "
 
-def loadData(file, path = "../Datasets/ML Dataset/Dev/"):
+def loadData(file, path = "../Datasets/ML Dataset/Test/"):
 	with open(path + file, "rb") as f:
 		return pickle.load(f)
 
@@ -182,7 +183,7 @@ def createTimeAnalysis():
 		# for j, key in enumerate(featureMap):
 			# print key, featureMap[key]
 			# if j == 100: break
-		writeFeatures(featureMap, "dev Featurized " + str(i) + ".pkl")
+		writeFeatures(featureMap, config.outFile + str(i) + ".pkl")
 		print "At timestep: ", i, len(featureMap), " amount of time it took was: ", (time.clock() - currTime)
 
 
