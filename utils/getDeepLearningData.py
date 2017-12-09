@@ -6,8 +6,8 @@ import pickle
 import dill
 
 class config:
-	# pinterest_filepath = "/cvgl2/u/bcui/Datasets/pinterest_data/"
-	pinterest_filepath = "../Datasets/pinterest_data/"
+	pinterest_filepath = "/cvgl2/u/bcui/CS 224W/Datasets/pinterest_data/"
+	# pinterest_filepath = "../Datasets/pinterest_data/"
 	debug = True
 	
 	num_steps = 50

@@ -12,12 +12,13 @@ class config:
 	board_token = "b"
 	pin_token = "p"
 
-	outPath = "../Datasets/Deep Learning Parsed/Dev/"
+	# outPath = "../Datasets/Deep Learning Parsed/Dev/"
+	outPath = "/cvgl2/u/bcui/CS 224w/Datasets/Deep Learning Parsed/Train/"
 	num_timesteps = 50
 
-	currFile = "dev "
+	currFile = "train "
 
-def loadData(file, path = "../Datasets/ML Dataset/Dev/"):
+def loadData(file, path = "/cvgl2/u/bcui/CS 224w/Datasets/ML Dataset/Train/"):#"../Datasets/ML Dataset/Dev/"):
 	with open(path + file, "rb") as f:
 		return pickle.load(f)
 
