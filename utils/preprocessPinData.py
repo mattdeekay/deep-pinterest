@@ -19,6 +19,12 @@ class config:
 	currFile = "train "
 
 def loadData(file, path = "/cvgl2/u/bcui/CS 224w/Datasets/ML Dataset/Train/"):#"../Datasets/ML Dataset/Dev/"):
+	outPath = "../Datasets/Deep Learning Parsed/Test/"
+	outFile = "test Featurized "
+	num_timesteps = 50
+
+	currFile = "test "
+
 	with open(path + file, "rb") as f:
 		return pickle.load(f)
 
@@ -183,7 +189,7 @@ def createTimeAnalysis():
 		# for j, key in enumerate(featureMap):
 			# print key, featureMap[key]
 			# if j == 100: break
-		writeFeatures(featureMap, "dev Featurized " + str(i) + ".pkl")
+		writeFeatures(featureMap, config.outFile + str(i) + ".pkl")
 		print "At timestep: ", i, len(featureMap), " amount of time it took was: ", (time.clock() - currTime)
 
 
